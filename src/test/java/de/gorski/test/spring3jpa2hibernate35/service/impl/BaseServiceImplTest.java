@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 @ContextConfiguration({"classpath:context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class BaseServiceImplTest {
-  public static final String URI = "http://localhost:8080/services/baseservice";
+  public static final String URI = "http://127.0.0.1:8080/services/baseservice";
 
   private static final Logger LOG = Logger.getLogger(BaseServiceImplTest.class);
   private static Country country = null;
