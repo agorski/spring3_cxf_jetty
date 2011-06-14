@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xmlns:cxf="http://cxf.apache.org/core" xmlns:http="http://cxf.apache.org/transports/http/configuration"
+       xmlns:httpj="http://cxf.apache.org/transports/http-jetty/configuration"
+
+       xsi:schemaLocation="
+  http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+  http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+  http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+  http://cxf.apache.org/core
+  http://cxf.apache.org/schemas/core.xsd
+  http://cxf.apache.org/jaxrs
+  http://cxf.apache.org/schemas/jaxrs.xsd
+  http://cxf.apache.org/configuration/security
+  http://cxf.apache.org/schemas/configuration/security.xsd
+  http://cxf.apache.org/transports/http/configuration
+  http://cxf.apache.org/schemas/configuration/http-conf.xsd
+  http://cxf.apache.org/transports/http-jetty/configuration
+  http://cxf.apache.org/schemas/configuration/http-jetty.xsd"
+       default-autowire="byName">
+    <aop:aspectj-autoproxy/>
+    <!-- Jetty configuration -->
+    <httpj:engine-factory bus="cxf">
+        <httpj:engine port="8080">
+            <httpj:tlsServerParametersRef id="secure"/>
+            <httpj:threadingParameters minThreads="5"
+                                       maxThreads="15"/>
+            <httpj:connector>
+                <bean class="org.mortbay.jetty.bio.SocketConnector">
+                    <property name="port" value="8080"/>
+                </bean>
+            </httpj:connector>
+            <httpj:handlers>
+                <bean class="org.mortbay.jetty.handler.DefaultHandler"/>
+            </httpj:handlers>
+            <httpj:sessionSupport>true</httpj:sessionSupport>
+        </httpj:engine>
+    </httpj:engine-factory>
+
+    <!-- CXF START of definition -->
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+    <bean id="baserServiceSEI"
+          class="de.gorski.test.spring3jpa2hibernate35.service.impl.BaseServiceImpl"/>
+    <jaxrs:server id="restWSServer" address="/">
+        <jaxrs:serviceBeans>
+            <ref bean="baserServiceSEI"/>
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <!--
+                      <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+                  -->
+            <ref bean="jsonProvider"/>
+        </jaxrs:providers>
+    </jaxrs:server>
+
+    <bean id="jsonProvider" class="de.gorski.test.spring3jpa2hibernate35.service.CustomJsonProvider">
+        <!--		<property name="serializeAsArray" value="true" />-->
+        <!--		<property name="dropRootElement" value="true" />-->
+    </bean>
+
+    <cxf:bus>
+        <cxf:features>
+            <cxf:logging/>
+        </cxf:features>
+    </cxf:bus>
+    <!-- // CXF END of definition -->
+
+    <bean id="dataSourceMySql"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="username" value="sa"/>
+        <property name="password" value=""/>
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+        <property name="url" value="jdbc:hsqldb:mem:testdb"/>
+    </bean>
+
+    <bean id="dataSourceHsql"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="username" value="sa"/>
+        <property name="password" value=""/>
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+        <property name="url" value="jdbc:hsqldb:mem:testdb"/>
+        <!--<property name="url" value="jdbc:hsqldb:hsql://localhost/"/>-->
+    </bean>
+
+    <bean id="entityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSourceHsql"/>
+        <property name="persistenceUnitName" value="spring.training" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="false"/>
+                <property name="generateDdl" value="true"/>
+                <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+            </bean>
+        </property>
+        <property name="jpaPropertyMap">
+            <map>
+                <entry key="hibernate.cache.region.factory_class"
+                       value="net.sf.ehcache.hibernate.SingletonEhCacheRegionFactory"/>
+                <entry key="hibernate.cache.use_query_cache" value="true"/>
+                <entry key="hibernate.cache.use_second_level_cache" value="true"/>
+            </map>
+        </property>
+    </bean>
+
+    <context:component-scan base-package="de.gorski.test.spring3jpa2hibernate35"/>
+    <context:annotation-config/>
+
+    <!-- spring default name is transactionManager -->
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>

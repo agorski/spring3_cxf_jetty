@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<suite name="ServicesTestSuite">
+    <test name="DAOs">
+        <classes>
+            <class name=" de.auco.gbc.schulung.server.service.dao.impl.CountryDaoTest"/>
+        </classes>
+    </test>
+
+</suite>
