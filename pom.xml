@@ -242,9 +242,11 @@
                                 <id>start-jetty</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
+                                    <!--suppress MavenModelInspection -->
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
+                                    <scanIntervalSeconds>0</scanIntervalSeconds>
                                     <daemon>true</daemon>
                                 </configuration>
                             </execution>
@@ -252,6 +254,7 @@
                                 <id>stop-jetty</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
+                                    <!--suppress MavenModelInspection -->
                                     <goal>stop</goal>
                                 </goals>
                             </execution>
