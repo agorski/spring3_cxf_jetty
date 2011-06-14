@@ -17,12 +17,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
+import java.util.Calendar;
+
 import static org.junit.Assert.*;
 
 @ContextConfiguration({"classpath:context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class BaseServiceImplTest {
-  public static final String URI = "http://127.0.0.1:8080/services/baseservice";
+  private static final String URI = "http://127.0.0.1:8080/services/baseservice";
 
   private static final Logger LOG = Logger.getLogger(BaseServiceImplTest.class);
   private static Country country = null;
@@ -57,7 +59,8 @@ public class BaseServiceImplTest {
         MediaType.APPLICATION_XML).put(ClientResponse.class, country);
     assertEquals("Invalid server response code", 200, response.getStatus());
 
-    LOG.debug(response.getEntity(String.class));
+//    LOG.debug("response with Country.class: " + response.getEntity(Country.class));
+    LOG.debug("response with String.class : " + response.getEntity(String.class));
     LOG.debug("<- " + m);
   }
 
@@ -113,13 +116,13 @@ public class BaseServiceImplTest {
     Client client = new Client();
     WebResource wr = client.resource(URI + "/q");
     MultivaluedMap queryParams = new MultivaluedMapImpl();
-    queryParams.add("id", "costam");
-    queryParams.add("type", "5634785687");
+    queryParams.add("id", "IdValue");
+    queryParams.add("type", "TypeValue_"+String.format("%1$td.%1$tm.%1$tY", Calendar.getInstance()));
     ClientResponse response = wr.queryParams(queryParams).type(MediaType.APPLICATION_FORM_URLENCODED)
         .accept(MediaType.TEXT_PLAIN).get(ClientResponse.class);
     assertEquals("Invalid server response code", 200, response.getStatus());
-    String json = response.getEntity(String.class);
-    LOG.debug(json);
+    String responseEntity = response.getEntity(String.class);
+    LOG.debug(responseEntity);
 
     LOG.debug("<- " + m);
   }

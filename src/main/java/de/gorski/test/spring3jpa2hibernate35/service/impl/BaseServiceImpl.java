@@ -76,6 +76,6 @@ public class BaseServiceImpl implements BaseService {
   @Produces({MediaType.TEXT_PLAIN})
   public String getParametersAndDoJson(@QueryParam("id") String id,
                                        @QueryParam("type") String type) throws Exception {
-    return "hello " + id + " " + type;
+    return String.format("response id=[%s], type=[%s]", id, type);
   }
 }
